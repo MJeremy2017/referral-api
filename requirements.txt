@@ -1,3 +1,2 @@
-PyMuPDF==1.17.6
 Flask==1.1.2
 zappa==0.51.0
