@@ -39,19 +39,43 @@ def ask_refer_bytedance():
             filepath = os.path.join(UPLOAD_DIRECTORY, filename)
             file.save(filepath)
             app.logger.info('file saved to {}'.format(filepath))
-            upload2s3(filepath)
+            upload2s3(filepath, 'bytedance')
             return 'Your request for bytedance referral has been successfully processed. ' \
-                   'We will get back to you in 48 hours'
+                   'We will get back to you through email in 48 hours'
         else:
             return jsonify({'error': 'File format wrong, allowed formats are {}'.format(ALLOWED_EXTENSIONS)})
 
 
-def upload2s3(filepath):
-    bucket = 'zappa-pdf-extractor-api'
+@app.route('/ask_refer/grab', methods=['POST'])
+def ask_refer_grab():
+    # request.args.to_dict() get parameters
+    # records = request.data
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return jsonify({'error': 'No selected file'})
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'})
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            app.logger.info('load file {}'.format(filename))
+            filepath = os.path.join(UPLOAD_DIRECTORY, filename)
+            file.save(filepath)
+            app.logger.info('file saved to {}'.format(filepath))
+            upload2s3(filepath, 'grab')
+            return 'Your request for grab referral has been successfully processed. ' \
+                   'We will get back to you through email in 48 hours'
+        else:
+            return jsonify({'error': 'File format wrong, allowed formats are {}'.format(ALLOWED_EXTENSIONS)})
+
+
+def upload2s3(filepath, company):
+    bucket = 'zappa-referral-api-eu2hzy8sf'
     date_utc = datetime.utcfromtimestamp(int(time.time()))
-    key = 'referral' + '/{}/{}/{}/'.format(date_utc.year,
-                                           str(date_utc.month).zfill(2),
-                                           str(date_utc.day).zfill(2)) + 'candidate_' + str(date_utc.second).zfill(2)
+    appendix = str(date_utc.hour).zfill(2) + str(date_utc.minute).zfill(2) + str(date_utc.second).zfill(2)
+    key = 'referral/' + company + '/{}/{}/{}/'.format(date_utc.year,
+                                                      str(date_utc.month).zfill(2),
+                                                      str(date_utc.day).zfill(2)) + 'candidate_' + appendix
     app.logger.info('s3 saved file key {}'.format(key))
     s3 = boto3.client('s3')
     with open(filepath, "rb") as f:
