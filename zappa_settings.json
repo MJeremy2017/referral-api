@@ -1,0 +1,10 @@
+{
+    "production": {
+        "app_function": "app.app",
+        "aws_region": "ap-southeast-1",
+        "profile_name": "default",
+        "project_name": "referral-api",
+        "runtime": "python3.7",
+        "s3_bucket": "zappa-referral-api-eu2hzy8sf"
+    }
+}
